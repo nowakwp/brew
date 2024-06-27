@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
-HOMEBREW_REQUIRED_RUBY_VERSION = ARGV.first.freeze
+HOMEBREW_REQUIRED_RUBY_VERSION = T.let(ARGV.first.freeze, String)
 raise "No Ruby version passed!" if HOMEBREW_REQUIRED_RUBY_VERSION.to_s.empty?
 
 require "rubygems"
