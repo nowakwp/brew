@@ -49,7 +49,7 @@ module Utils
         deferred_curl(url, args)
       end
 
-      sig { params(url: String, args: T::Array[String]).void }
+      sig { params(url: String, args: T.untyped).void }
       def deferred_curl(url, args)
         curl = Utils::Curl.curl_executable
         if ENV["HOMEBREW_ANALYTICS_DEBUG"]
@@ -156,26 +156,31 @@ module Utils
         report_influx(:test_bot_test, tags, fields)
       end
 
+      sig { returns(T::Boolean) }
       def influx_message_displayed?
         config_true?(:influxanalyticsmessage)
       end
 
+      sig { returns(T::Boolean) }
       def messages_displayed?
         config_true?(:analyticsmessage) &&
           config_true?(:caskanalyticsmessage) &&
           influx_message_displayed?
       end
 
+      sig { returns(T::Boolean) }
       def disabled?
         return true if Homebrew::EnvConfig.no_analytics?
 
         config_true?(:analyticsdisabled)
       end
 
+      sig { returns(T::Boolean) }
       def not_this_run?
         ENV["HOMEBREW_NO_ANALYTICS_THIS_RUN"].present?
       end
 
+      sig { returns(T::Boolean) }
       def no_message_output?
         # Used by Homebrew/install
         ENV["HOMEBREW_NO_ANALYTICS_MESSAGE_OUTPUT"].present?
@@ -202,6 +207,7 @@ module Utils
         Homebrew::Settings.delete :analyticsuuid
       end
 
+      sig { params(args: T.untyped, filter: T.nilable(String)).void }
       def output(args:, filter: nil)
         days = args.days || "30"
         category = args.category || "install"
@@ -237,6 +243,7 @@ module Utils
         table_output(category, days, results, os_version:, cask_install:)
       end
 
+      sig { params(json: T::Hash[String, T.untyped], args: T.untyped).void }
       def output_analytics(json, args:)
         full_analytics = args.analytics? || verbose?
 
@@ -266,6 +273,7 @@ module Utils
       # It relies on screen scraping some GitHub HTML that's not available as an API.
       # This seems very likely to break in the future.
       # That said, it's the only way to get the data we want right now.
+      sig { params(formula: Formula, args: T.untyped).void }
       def output_github_packages_downloads(formula, args:)
         return unless args.github_packages_downloads?
         return unless formula.core_formula?
@@ -307,6 +315,7 @@ module Utils
         puts "#{number_readable(thirty_day_download_count)} (30 days)"
       end
 
+      sig { params(formula: Formula, args: T.untyped).void }
       def formula_output(formula, args:)
         return if Homebrew::EnvConfig.no_analytics? || Homebrew::EnvConfig.no_github_api?
 
@@ -320,6 +329,7 @@ module Utils
         nil
       end
 
+      sig { params(cask: Cask::Cask, args: T.untyped).void }
       def cask_output(cask, args:)
         return if Homebrew::EnvConfig.no_analytics? || Homebrew::EnvConfig.no_github_api?
 
@@ -375,6 +385,10 @@ module Utils
         end
       end
 
+      sig {
+        params(category: String, days: String, results: T::Hash[Symbol, Integer], os_version: T::Boolean,
+               cask_install: T::Boolean).void
+      }
       def table_output(category, days, results, os_version: false, cask_install: false)
         oh1 "#{category} (#{days} days)"
         total_count = results.values.inject("+")
@@ -462,14 +476,17 @@ module Utils
              "#{formatted_total_count_footer} | #{formatted_total_percent_footer}%"
       end
 
+      sig { params(key: Symbol).returns(T::Boolean) }
       def config_true?(key)
         Homebrew::Settings.read(key) == "true"
       end
 
+      sig { params(count: Integer).returns(String) }
       def format_count(count)
         count.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
       end
 
+      sig { params(percent: Integer).returns(String) }
       def format_percent(percent)
         format("%<percent>.2f", percent:)
       end
